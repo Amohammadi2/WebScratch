@@ -19,6 +19,7 @@
     :global(body){
         padding: 0; margin: 0;
     }
+
     div.main-container {
         width: $full-width;
         
@@ -28,6 +29,8 @@
             
             .game-canvas-container {
                 width: $full-width;
+                height: $canvas-height;
+                margin: 0; padding: 0;
 
                 #game-canvas {
                     background-color: rgb(245, 245, 245);
@@ -38,7 +41,7 @@
 
             .project-dirs-container {
                 width: $full-width;
-                height: calc(100vh - #{$canvas-height + 5px});
+                height: calc(100vh - #{$canvas-height});
                 background-color: rgb(12, 12, 12);
             }
         }
