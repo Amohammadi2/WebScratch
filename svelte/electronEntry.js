@@ -3,8 +3,8 @@ let mainWindow;
 
 function initMainWindow() {
     let windowOptions = {
-        width: 900,
-        height: 600,
+        width: 1200,
+        height: 700,
         webPreferences: {
             nodeIntegration: true,
         }
