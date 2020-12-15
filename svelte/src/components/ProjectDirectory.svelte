@@ -1,6 +1,6 @@
 <script>
     import { onMount } from "svelte";
-    import { CWDPath } from "./../states";
+    import { CWDPath, pathDelimiter } from "./../states";
     let { ipcRenderer }= require("electron");
     let fs = require("fs");
 
@@ -12,12 +12,11 @@
      * @description we use CWDPath as the base (root)
      * and `relativePath` is relative to the root dir
      */
-    let relativePath = [];
+    let relativePath = "";
 
     function initComponent() {
         initIPCRenderer();
         CWDPath.set(localStorage.getItem("CWDPath") || "");
-        console.log($CWDPath);
     }
 
     function initIPCRenderer() {
@@ -38,18 +37,27 @@
         fs.readdir(path, (err,dirFileList) => {
             if (err) throw err;
             dirFileList.forEach(file => {
-                console.log(file);
-                let filePath = `${path}/${file}`;
+                let filePath = `${path}${pathDelimiter}${file}`;
                 fs.lstatSync(filePath).isDirectory()
                     ? folders.push(file)
                     : files.push(file);
             });
             CWDFileList = files;
             CWDFolderList = folders;
-
-            console.log(CWDFileList)
-            console.log(CWDFolderList)
         });
+    }
+
+    function changeDirectory(rel_path){
+        if (rel_path == ".."){
+            let pathArray = relativePath.split(pathDelimiter);
+            // delete the last item -> return back to the parent dir
+            pathArray.splice((pathArray.length-1), 1);
+            relativePath = pathArray.join(pathDelimiter);
+        }
+        else{
+            relativePath += `${pathDelimiter}${rel_path}`;
+        }
+        listCWD($CWDPath+relativePath);
     }
 
     CWDPath.subscribe((CWD) => CWD && listCWD(CWD));
@@ -63,9 +71,10 @@
             <button class="btn-primary btn-big" on:click={selectDirectory}>open folder</button>
         </div>
     {:else}
+        <button on:click={event=>changeDirectory("..")}>&lt;- back</button>
         <ul class="file-list">
             {#each CWDFolderList as folder}
-                <li>{folder}</li>
+                <li on:click={(event)=>changeDirectory(folder)}>{folder}</li>
             {/each}
             {#each CWDFileList as file}
                 <li>{file}</li>
