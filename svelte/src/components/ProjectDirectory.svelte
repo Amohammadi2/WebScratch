@@ -2,6 +2,17 @@
     import { onMount } from "svelte";
     import { CWDPath } from "./../states";
     let { ipcRenderer }= require("electron");
+    let fs = require("fs");
+
+    let CWDFileList = [];
+    let CWDFolderList = [];
+    let a = [1,2];
+    /**
+     * @var relativePath
+     * @description we use CWDPath as the base (root)
+     * and `relativePath` is relative to the root dir
+     */
+    let relativePath = [];
 
     function initComponent() {
         initIPCRenderer();
@@ -21,6 +32,28 @@
         ipcRenderer.send("select-directory");
     }
 
+    function listCWD(path) {
+        let files = [];
+        let folders = [];
+        fs.readdir(path, (err,dirFileList) => {
+            if (err) throw err;
+            dirFileList.forEach(file => {
+                console.log(file);
+                let filePath = `${path}/${file}`;
+                fs.lstatSync(filePath).isDirectory()
+                    ? folders.push(file)
+                    : files.push(file);
+            });
+            CWDFileList = files;
+            CWDFolderList = folders;
+
+            console.log(CWDFileList)
+            console.log(CWDFolderList)
+        });
+    }
+
+    CWDPath.subscribe((CWD) => CWD && listCWD(CWD));
+
     onMount(initComponent);
 </script>
 
@@ -30,7 +63,14 @@
             <button class="btn-primary btn-big" on:click={selectDirectory}>open folder</button>
         </div>
     {:else}
-        <p>the path is: {$CWDPath}</p>
+        <ul class="file-list">
+            {#each CWDFolderList as folder}
+                <li>{folder}</li>
+            {/each}
+            {#each CWDFileList as file}
+                <li>{file}</li>
+            {/each}
+        </ul>
     {/if}
 </div>
 
