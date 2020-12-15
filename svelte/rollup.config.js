@@ -31,6 +31,9 @@ function serve() {
 
 export default {
 	input: 'src/main.js',
+	onwarn: (warning, onwarnHandler) =>
+		// just to disable unused-selector warnings when building the app
+		warning.pluginCode === 'css-unused-selector' || onwarnHandler(warning),
 	output: {
 		sourcemap: true,
 		format: 'iife',

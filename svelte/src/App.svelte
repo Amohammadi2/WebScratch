@@ -1,3 +1,7 @@
+<script>
+    import ProjectDirectory from "./components/ProjectDirectory.svelte";
+</script>
+
 <div class="main-container">
     <div class="col-left">
         <span>f </span>
@@ -6,29 +10,28 @@
         <div class="game-canvas-container">
             <canvas id="game-canvas"></canvas>
         </div>
-        <section class="project-dirs-container"></section>
+        <!-- shows the project files -->
+        <ProjectDirectory /> 
     </div>
 </div>
 
 <style lang="scss">
 
-    $full-width: 100%;
-    $canvas-width: 500px;
-    $canvas-height: 350px;
+    @import "./variables.scss";
 
     :global(body){
         padding: 0; margin: 0;
     }
 
     div.main-container {
-        width: $full-width;
+        width: $full;
         
         .col-right {
             float: left;
             width: $canvas-width;
             
             .game-canvas-container {
-                width: $full-width;
+                width: $full;
                 height: $canvas-height;
                 margin: 0; padding: 0;
 
@@ -38,17 +41,11 @@
                     height: $canvas-height;
                 }
             }
-
-            .project-dirs-container {
-                width: $full-width;
-                height: calc(100vh - #{$canvas-height});
-                background-color: rgb(12, 12, 12);
-            }
         }
 
         .col-left {
             float: left;
-            width: calc(#{$full-width} - #{$canvas-width});
+            width: calc(#{$full} - #{$canvas-width});
         }
     }
 </style>

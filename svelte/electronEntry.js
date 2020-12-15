@@ -1,5 +1,10 @@
-let { BrowserWindow, app} = require("electron");
+let { BrowserWindow, app, dialog, ipcMain} = require("electron");
 let mainWindow;
+
+function initWrapper() {
+    initMainWindow();
+    initIPCMainEvents();
+}
 
 function initMainWindow() {
     let windowOptions = {
@@ -13,5 +18,17 @@ function initMainWindow() {
     mainWindow.loadFile("./public/index.html");
 }
 
-app.whenReady().then(initMainWindow);
+function initIPCMainEvents() {
+    ipcMain.on("select-directory", (event) => {
+        let path = dialog.showOpenDialog(mainWindow, {
+            properties: ["openDirectory"]
+        });
+        path.then((result) => {
+           if (result.canceled) return;
+           event.reply("directory-selected", result.filePaths[0]);
+        })
+    })
+}
+
+app.whenReady().then(initWrapper);
 app.on("window-all-closed", (event)=>app.exit());
