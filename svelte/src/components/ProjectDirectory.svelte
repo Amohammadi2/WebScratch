@@ -6,7 +6,6 @@
 
     let CWDFileList = [];
     let CWDFolderList = [];
-    let a = [1,2];
     /**
      * @var relativePath
      * @description we use CWDPath as the base (root)
@@ -34,17 +33,20 @@
     function listCWD(path) {
         let files = [];
         let folders = [];
-        fs.readdir(path, (err,dirFileList) => {
-            if (err) throw err;
-            dirFileList.forEach(file => {
-                let filePath = `${path}${pathDelimiter}${file}`;
-                fs.lstatSync(filePath).isDirectory()
-                    ? folders.push(file)
-                    : files.push(file);
-            });
-            CWDFileList = files;
-            CWDFolderList = folders;
+        console.log("listing this path: " + path);
+        let dirFileList = fs.readdirSync(path);
+        console.log("found these files: ",dirFileList);
+        dirFileList.forEach(file => {
+            let filePath = `${path}${pathDelimiter}${file}`;
+            fs.lstatSync(filePath).isDirectory()
+                ? folders.push(file)
+                : files.push(file);
         });
+        CWDFileList = files;
+        CWDFolderList = folders;
+
+        console.log(CWDFileList)
+        console.log(CWDFolderList)
     }
 
     function changeDirectory(rel_path){
@@ -71,13 +73,22 @@
             <button class="btn-primary btn-big" on:click={selectDirectory}>open folder</button>
         </div>
     {:else}
-        <button on:click={event=>changeDirectory("..")}>&lt;- back</button>
+        <span class="material-icon round" on:click={(event)=>changeDirectory("..")}>
+            <img src="./icons/back.svg" alt={"back"}/>
+        </span>
         <ul class="file-list">
             {#each CWDFolderList as folder}
-                <li on:click={(event)=>changeDirectory(folder)}>{folder}</li>
+                <li on:click={(event)=>changeDirectory(folder)}>
+                    <span class="material-icon">
+                        <img src="./icons/folder.svg" alt={"folder:"}/>
+                    </span>
+                    <span class="file-name">{folder}</span>
+                </li>
             {/each}
             {#each CWDFileList as file}
-                <li>{file}</li>
+                <li>
+                    <span class="file-name">{file}</span>
+                </li>
             {/each}
         </ul>
     {/if}
@@ -90,10 +101,37 @@
     .project-dirs-container {
         width: $full;
         height: calc(100vh - #{$canvas-height});
-        background-color: rgb(12, 12, 12);
+        background-color: rgb(230, 230, 230);
         overflow-y: scroll;
         box-sizing: border-box;
-        color: white;
+        color: rgb(31, 31, 31);
         padding: 5px;
+
+        .file-list {
+            list-style: none;
+
+            li {
+                display: flex;
+                align-items: center;
+                justify-content: left;
+                margin-top: 8px;
+                margin-bottom: 8px;
+                
+                span {
+                    margin: 0px 8px;
+                }
+            }
+        }
+    }
+
+    .top-bar {
+        position: fixed;
+        display: flex;
+        justify-content: left;
+        align-items: center;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 50px;
     }
 </style>
