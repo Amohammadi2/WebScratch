@@ -6,6 +6,7 @@
 
     let CWDFileList = [];
     let CWDFolderList = [];
+    let CWDRoot = ""; 
     /**
      * @var relativePath
      * @description we use CWDPath as the base (root)
@@ -62,7 +63,21 @@
         listCWD($CWDPath+relativePath);
     }
 
-    CWDPath.subscribe((CWD) => CWD && listCWD(CWD));
+    /**
+     * @function closeCWD
+     * @description removes current working directory
+     */
+    function closeCWD() {
+        if (confirm("Are you sure you want to close current working directory?")){
+            CWDPath.set("");
+            localStorage.removeItem("CWDPath");
+        }
+    }
+
+    CWDPath.subscribe((CWD) => {
+        CWD && listCWD(CWD);
+        CWDRoot = CWD.split(pathDelimiter).reverse()[0];
+    });
 
     onMount(initComponent);
 </script>
@@ -73,9 +88,17 @@
             <button class="btn-primary btn-big" on:click={selectDirectory}>open folder</button>
         </div>
     {:else}
-        <span class="material-icon round" on:click={(event)=>changeDirectory("..")}>
-            <img src="./icons/back.svg" alt={"back"}/>
-        </span>
+        <div class="top-bar">
+            <span class="material-icon round item margin-hor-1" on:click={(event)=>{closeCWD()}}>
+                <img src="./icons/close.svg" alt={"close"}/>
+            </span>
+            <span class="material-icon round item margin-hor-1" on:click={(event)=>changeDirectory("..")}>
+                <img src="./icons/back.svg" alt={"back"}/>
+            </span>
+            <span class="item" id="path-nav">
+                {CWDRoot + relativePath}
+            </span>
+        </div>
         <ul class="file-list">
             {#each CWDFolderList as folder}
                 <li on:click={(event)=>changeDirectory(folder)}>
@@ -87,6 +110,9 @@
             {/each}
             {#each CWDFileList as file}
                 <li>
+                    <span class="material-icon">
+                        <img src="./icons/file.svg" alt={"file:"}/>
+                    </span>
                     <span class="file-name">{file}</span>
                 </li>
             {/each}
@@ -106,9 +132,32 @@
         box-sizing: border-box;
         color: rgb(31, 31, 31);
         padding: 5px;
+        position: relative;
+
+        &::-webkit-scrollbar {
+            width: 8px;
+            margin-right: 10px;
+        }
+
+        /* Track */
+        &::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            padding: 3px;
+        }
+
+        /* Handle */
+        &::-webkit-scrollbar-thumb {
+            background: rgb(21, 90, 194);
+        }
+
+        /* Handle on hover */
+        &::-webkit-scrollbar-thumb:hover {
+            background: rgb(12, 39, 80);
+        }
 
         .file-list {
             list-style: none;
+            margin-top: 50px;
 
             li {
                 display: flex;
@@ -116,6 +165,7 @@
                 justify-content: left;
                 margin-top: 8px;
                 margin-bottom: 8px;
+                cursor: pointer;
                 
                 span {
                     margin: 0px 8px;
@@ -125,7 +175,7 @@
     }
 
     .top-bar {
-        position: fixed;
+        position: absolute;
         display: flex;
         justify-content: left;
         align-items: center;
@@ -133,5 +183,22 @@
         left: 0;
         right: 0;
         height: 50px;
+        box-sizing: border-box;
+        padding: 10px;
+
+        .item {
+            margin: 10px 0;
+            margin-right: 8px;
+
+            .margin-hor-1 {
+                margin: 10px 0;
+            }
+        }
+
+        #path-nav {
+            background-color: rgb(21, 90, 194);
+            color: white;
+            padding: 3px 8px;
+        }
     }
 </style>
