@@ -1,3 +1,5 @@
+@import "./variables.scss";
+
 .justify-content-center {
     display: flex;
     justify-content: center;
@@ -26,4 +28,19 @@
     &:hover {
         box-shadow: 0px 0px 30px 0px rgb(111, 150, 175);
     }
+}
+
+.material-icon {
+    width: $material-icon-length;
+    height: $material-icon-length;
+    cursor: pointer;
+
+    img {
+        width: $material-icon-length; height: $material-icon-length;
+        
+    }
+}
+
+.round {
+    border-radius: 50%;
 }
