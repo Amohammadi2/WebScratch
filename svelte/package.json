@@ -20,6 +20,7 @@
     "svelte-preprocess": "^4.6.1"
   },
   "dependencies": {
+    "codemirror": "^5.58.3",
     "glob": "^7.1.6",
     "matter-js": "^0.14.2",
     "sirv-cli": "^1.0.0"
