@@ -1,10 +1,11 @@
 <script>
     import ProjectDirectory from "./components/ProjectDirectory.svelte";
+    import CodeEditor from "./components/CodeEditor.svelte";
 </script>
 
 <div class="main-container">
     <div class="col-left">
-        <span>f </span>
+        <CodeEditor />
     </div>
     <div class="col-right">
         <div class="game-canvas-container">
