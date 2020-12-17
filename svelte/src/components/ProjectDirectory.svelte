@@ -34,7 +34,6 @@
     function listCWD(path) {
         let files = [];
         let folders = [];
-        console.log("listing this path: " + path);
         let dirFileList = fs.readdirSync(path);
         console.log("found these files: ",dirFileList);
         dirFileList.forEach(file => {
@@ -45,9 +44,6 @@
         });
         CWDFileList = files;
         CWDFolderList = folders;
-
-        console.log(CWDFileList)
-        console.log(CWDFolderList)
     }
 
     function changeDirectory(rel_path){
