@@ -1,18 +1,26 @@
 <script>
     import ProjectDirectory from "./components/ProjectDirectory.svelte";
     import CodeEditor from "./components/CodeEditor.svelte";
+    import EditorWindow from "./components/EditorWindow.svelte";
+    import ComponentsEditor from "./components/ComponentsEditor.svelte";
 </script>
 
 <div class="main-container">
-    <div class="col-left">
+    <EditorWindow>
         <CodeEditor />
+    </EditorWindow>
+    <div class="col-left">
+        f
+    </div>
+    <div class="col-middle">
+        <ProjectDirectory />
+        <ComponentsEditor />
     </div>
     <div class="col-right">
         <div class="game-canvas-container">
             <canvas id="game-canvas"></canvas>
         </div>
         <!-- shows the project files -->
-        <ProjectDirectory /> 
     </div>
 </div>
 
@@ -44,9 +52,14 @@
             }
         }
 
+        .col-middle {
+            float: left;
+            width: 30%;
+        }
+
         .col-left {
             float: left;
-            width: calc(#{$full} - #{$canvas-width});
+            width: calc(70% - #{$canvas-width});
         }
     }
 </style>
