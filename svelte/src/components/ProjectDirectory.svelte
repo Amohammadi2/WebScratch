@@ -1,6 +1,8 @@
 <script>
     import { onMount } from "svelte";
-    import { CWDPath, pathDelimiter } from "./../states";
+    import { 
+        CWDPath, pathDelimiter, supportedFileFormats, codeEditorContents, isEditorOpened
+    } from "./../states";
     let { ipcRenderer }= require("electron");
     let fs = require("fs");
 
@@ -70,6 +72,15 @@
         }
     }
 
+    function openFile(file_path, file_name) {
+        let full_file_path = file_path + pathDelimiter + file_name;
+        let file_ext = file_name.split(".").reverse()[0];
+        if (supportedFileFormats.includes(file_ext)) {
+            codeEditorContents.set(fs.readFileSync(full_file_path, "utf8"));
+            isEditorOpened.set(true);
+        }
+    }
+
     CWDPath.subscribe((CWD) => {
         CWD && listCWD(CWD);
         CWDRoot = CWD.split(pathDelimiter).reverse()[0];
@@ -78,7 +89,7 @@
     onMount(initComponent);
 </script>
 
-<div class="project-dirs-container">
+<div class="project-dirs-container" on:contextmenu={(event) => alert("you've right clicked")}>
     {#if !($CWDPath)}
         <div class="justify-content-center">
             <button class="btn-primary btn-big" on:click={selectDirectory}>open folder</button>
@@ -105,7 +116,7 @@
                 </li>
             {/each}
             {#each CWDFileList as file}
-                <li>
+                <li on:click={(event) => (openFile($CWDPath + relativePath, file))}>
                     <span class="material-icon">
                         <img src="./icons/file.svg" alt={"file:"}/>
                     </span>
@@ -122,7 +133,7 @@
 
     .project-dirs-container {
         width: $full;
-        height: calc(100vh - #{$canvas-height});
+        height: calc(50vh);
         background-color: rgb(230, 230, 230);
         overflow-y: scroll;
         box-sizing: border-box;
