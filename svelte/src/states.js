@@ -4,3 +4,8 @@ import { writable } from "svelte/store";
 export const CWDPath = writable("");
 export const pathDelimiter = 
     process.platform === "win32" ? "\\" : "/";
+export const supportedFileFormats = [
+    "json", "js"
+];
+export const codeEditorContents = writable("");
+export const isEditorOpened = writable(false); 
