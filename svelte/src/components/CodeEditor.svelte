@@ -1,18 +1,33 @@
 <script>
     import { onMount } from "svelte";
+    import { codeEditorContents, isEditorOpened } from "../states";
     
     let textArea;
+    let editor;
+
+    function updateTextArea(contents) {
+        editor.getDoc().setValue(contents);
+    }
+
+    function closeEditor(event) {
+        isEditorOpened.set(false);
+    }
+
     onMount(() => {
-        let editor = CodeMirror.fromTextArea(textArea, {
+        editor = CodeMirror.fromTextArea(textArea, {
             lineNumbers: true,
-            mode: "javascript"
+            mode: "javascript",
         });
         console.log("modes", CodeMirror.modes);
+        console.log("editor obj", editor);
+
+        codeEditorContents.subscribe(updateTextArea);
     });
 </script>
 
 <div class="code-container">
     <div class="action-bar">
+        <button class="action-btn alert" on:click={closeEditor}>&times;</button>
         <button class="action-btn primary">run</button>
         <button class="action-btn secondary">save</button>
     </div>
@@ -30,7 +45,7 @@
     .code-container{
         .action-bar {
             height: $action-bar-height;
-            width: calc(#{$full} - #{$canvas-width});
+            width: $full;
             position: absolute;
             top:0;
             right: 0;
@@ -59,6 +74,11 @@
                     &.secondary{
                         background-color: rgb(48, 48, 48);
                         color: rgb(255, 255, 255);
+                    }
+
+                    &.alert {
+                        background-color: rgb(172, 30, 30);
+                        color:rgb(255, 255, 255);
                     }
                 }   
             }
