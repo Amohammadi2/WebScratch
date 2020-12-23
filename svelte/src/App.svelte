@@ -3,7 +3,10 @@
     import CodeEditor from "./components/CodeEditor.svelte";
     import EditorWindow from "./components/EditorWindow.svelte";
     import ComponentsEditor from "./components/ComponentsEditor.svelte";
+    import ComponentCreator from "./components/ComponentCreator.svelte";
 </script>
+
+<ComponentCreator />
 
 <div class="main-container">
     <EditorWindow>
