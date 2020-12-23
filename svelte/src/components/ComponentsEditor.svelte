@@ -1,9 +1,22 @@
+<script>
+    import { gameComponents, isComponentCreatorOpened } from "../states";
+
+    function openComponentCreator(event) {
+        isComponentCreatorOpened.set(true);
+    }
+</script>
+
 <div class="components-editor">
     <div class="header">
         <span class="title">Game Components</span>
         <span class="title">
-            <span class="action-btn">+</span>
+            <span class="action-btn" on:click={openComponentCreator}>+</span>
         </span>
+    </div>
+    <div class="items">
+        {#each gameComponents as component}
+            <div class="item">{component.label}</div>
+        {/each}
     </div>
 </div>
 
