@@ -8,4 +8,6 @@ export const supportedFileFormats = [
     "json", "js"
 ];
 export const codeEditorContents = writable("");
-export const isEditorOpened = writable(false); 
+export const isEditorOpened = writable(false);
+export const gameComponents = writable([]);
+export const isComponentCreatorOpened = writable(false);
