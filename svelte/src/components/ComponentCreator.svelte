@@ -1,23 +1,34 @@
 <script>
     import { isComponentCreatorOpened } from "../states";
     import { fade, fly } from "svelte/transition";
+
+    let closeComponentCreator = (event) =>
+        isComponentCreatorOpened.set(false);
+
 </script>
 
 {#if $isComponentCreatorOpened}
-    <div class="wrapper" transition:fade={{duration: 300}}>
+    <div class="wrapper" transition:fade={{duration: 300}} on:click={closeComponentCreator}>
         <div class="component-creator" transition:fly={{y: -300, duration: 400}}>
             <div class="header">
                 <span 
-                    on:click={event=>isComponentCreatorOpened.set(false)}
+                    on:click={closeComponentCreator}
                     class="btn-alert"
                 >&times;</span>
                 <span>create a new game component</span>
             </div>
             <div class="body">
-                <!-- TODO: add component fields here -->
+                <input type="text" class="form-input" placeholder="label">
+                <select class="form-input">
+                    <option value="rectangle">Rectangle</option>
+                </select>
+                <input type="number" min="0" class="form-input-small" placeholder="offset X:">
+                <input type="number" min="0" class="form-input-small" placeholder="offset Y:">
+                <input type="number" min="0" class="form-input-small" placeholder="width:">
+                <input type="number" min="0" class="form-input-small" placeholder="height:">
             </div>
             <div class="footer">
-                <button class="btn-alert btn-footer">close</button>
+                <button class="btn-alert btn-footer" on:click={closeComponentCreator}>close</button>
                 <button class="btn-primary btn-footer">create</button>
             </div>
         </div>
@@ -63,6 +74,7 @@
                 padding: 5px 10px;
                 transition: all .09s ease-out;
                 margin-right: 12px;
+                outline: none;
             }
 
             .btn-alert {
@@ -89,6 +101,18 @@
                 float: right;
                 margin-top: 10px;
             }
+
+            .form-input {
+                width: 97%;
+                margin: 9px 1.5%;
+            }
+
+            .form-input-small{
+                @extend .form-input;
+                width: 130px;
+                margin: 9px 1.5%;
+            }
+
         }
     }
 </style>
