@@ -8,7 +8,7 @@
 </script>
 
 {#if $isComponentCreatorOpened}
-    <div class="wrapper" transition:fade={{duration: 300}} on:click={closeComponentCreator}>
+    <div class="wrapper" transition:fade={{duration: 300}}>
         <div class="component-creator" transition:fly={{y: -300, duration: 400}}>
             <div class="header">
                 <span 

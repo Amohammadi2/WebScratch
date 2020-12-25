@@ -1,7 +1,11 @@
 <script>
-    import { gameComponents, isComponentCreatorOpened } from "../states";
-
+    import { CWDPath, gameComponents, isComponentCreatorOpened } from "../states";
+    import { NotificationAPI } from "../utils";
     function openComponentCreator(event) {
+        if (!$CWDPath) {
+            NotificationAPI.add("please open project directory first", "alert");
+            return;
+        }
         isComponentCreatorOpened.set(true);
     }
 </script>
