@@ -18,7 +18,7 @@
         </span>
     </div>
     <div class="items">
-        {#each gameComponents as component}
+        {#each $gameComponents as component}
             <div class="item">{component.label}</div>
         {/each}
     </div>
