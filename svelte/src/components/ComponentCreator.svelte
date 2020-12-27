@@ -1,10 +1,27 @@
 <script>
-    import { isComponentCreatorOpened } from "../states";
     import { fade, fly } from "svelte/transition";
+    import { isComponentCreatorOpened, gameComponents } from "../states";
+    import { GameObject } from "../utils";
+
+    let type, x, y, width, height;
+    let isStatic, label;
 
     let closeComponentCreator = (event) =>
         isComponentCreatorOpened.set(false);
 
+    function createComponent(event) {
+        console.log(label, type, x , y, width, height);
+        let newGameComponent = new GameObject(type, x, y, width, height, {
+            label,
+            isStatic
+        });
+        newGameComponent.add(); // add it to the world
+        gameComponents.update(value => {
+            // `.body` is the actual game object
+            return [...value, newGameComponent.body];
+        });
+        closeComponentCreator();
+    }
 </script>
 
 {#if $isComponentCreatorOpened}
@@ -18,18 +35,23 @@
                 <span>create a new game component</span>
             </div>
             <div class="body">
-                <input type="text" class="form-input" placeholder="label">
-                <select class="form-input">
+                <input type="text" class="form-input" placeholder="label" bind:value={label}>
+                <select class="form-input" bind:value={type}>
                     <option value="rectangle">Rectangle</option>
                 </select>
-                <input type="number" min="0" class="form-input-small" placeholder="offset X:">
-                <input type="number" min="0" class="form-input-small" placeholder="offset Y:">
-                <input type="number" min="0" class="form-input-small" placeholder="width:">
-                <input type="number" min="0" class="form-input-small" placeholder="height:">
+                <input type="number" min="0" class="form-input-small" placeholder="offset X:" bind:value={x}>
+                <input type="number" min="0" class="form-input-small" placeholder="offset Y:" bind:value={y}>
+                <input type="number" min="0" class="form-input-small" placeholder="width:" bind:value={width}>
+                <input type="number" min="0" class="form-input-small" placeholder="height:" bind:value={height}>
+                <br>
+                <label class="form-input">
+                    is static:
+                    <input type="checkbox" bind:checked={isStatic}>
+                </label>
             </div>
             <div class="footer">
                 <button class="btn-alert btn-footer" on:click={closeComponentCreator}>close</button>
-                <button class="btn-primary btn-footer">create</button>
+                <button class="btn-primary btn-footer" on:click={createComponent}>create</button>
             </div>
         </div>
     </div>
