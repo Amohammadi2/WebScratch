@@ -141,27 +141,6 @@
         padding: 5px;
         position: relative;
 
-        &::-webkit-scrollbar {
-            width: 8px;
-            margin-right: 10px;
-        }
-
-        /* Track */
-        &::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            padding: 3px;
-        }
-
-        /* Handle */
-        &::-webkit-scrollbar-thumb {
-            background: rgb(21, 90, 194);
-        }
-
-        /* Handle on hover */
-        &::-webkit-scrollbar-thumb:hover {
-            background: rgb(12, 39, 80);
-        }
-
         .file-list {
             list-style: none;
             margin-top: 50px;
