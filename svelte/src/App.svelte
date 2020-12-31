@@ -1,7 +1,7 @@
 <script>
     import { onMount } from "svelte";
     import { flip } from "svelte/animate";
-    import { notifications, gameComponents} from "./states";
+    import { notifications, gameComponents, componentsInitialStates, isPhysicsEngineRunning} from "./states";
     import { GameObject } from "./utils";
     import ProjectDirectory from "./components/ProjectDirectory.svelte";
     import CodeEditor from "./components/CodeEditor.svelte";
@@ -9,9 +9,9 @@
     import ComponentsEditor from "./components/ComponentsEditor.svelte";
     import ComponentCreator from "./components/ComponentCreator.svelte";
     import Notification from "./components/Notification.svelte";
+    import ComponentProperties from "./components/ComponentProperties.svelte";
 
     let gameCanvas;
-    let isPhysicsEngineRunning = false;
 
     function closeNotification (pk) {
         notifications.update((value) => {
@@ -20,9 +20,8 @@
     }
 
     function runPhysicsEngine() {
-        
-        isPhysicsEngineRunning = !isPhysicsEngineRunning;
-        if (isPhysicsEngineRunning){
+        isPhysicsEngineRunning.set(!($isPhysicsEngineRunning));
+        if ($isPhysicsEngineRunning){
             Matter.Runner.run(EngineRunner, PhysicsEngine);
         }
         else {
@@ -30,9 +29,20 @@
         }
     }
 
-    onMount(() => {
-        console.log(gameCanvas);
-        window.gm = gameComponents;
+    function initComponents() {
+        for (let stats of $componentsInitialStates) {
+            if (stats.mode == "body") {
+                let component = new GameObject
+                    (stats.mode, stats.type, stats.x, stats.y, stats.width, stats.height, stats.options);
+                gameComponents.update(components => [...components, component]);
+                component.create();
+                component.add(); // add to the world
+                console.log($gameComponents);
+            }
+        }
+    }
+
+    function initPhysicsEngine() {
         window.GameObject = GameObject;
         window.PhysicsEngine = Matter.Engine.create();
         window.Render = Matter.Render.create({
@@ -46,7 +56,9 @@
             }
         });
         window.EngineRunner = Matter.Runner.create();
+    }
 
+    function handleWindowResize() {
         window.onresize = function resizeCanvas() {
             Render.canvas.width = 650;
             Render.canvas.height = document.documentElement.clientHeight;
@@ -54,7 +66,29 @@
 
             return resizeCanvas;
         }();
+    }
 
+    function clearAllComponents() {
+        for (let gc of $gameComponents){
+            gc.remove();
+        }
+    }
+
+    onMount(() => {
+        initPhysicsEngine();
+        handleWindowResize();
+        initComponents();
+        let _=true;
+        isPhysicsEngineRunning.subscribe(isRunning => {
+            if (!isRunning && !_) {
+                clearAllComponents();
+                gameComponents.set([]);
+                initComponents();
+            }
+            else {
+                _=false;
+            }
+        });
         let cons = Matter.MouseConstraint.create(PhysicsEngine, {
             mouse: Matter.Mouse.create(Render.canvas),
             constraint: {
@@ -71,7 +105,6 @@
         let player = Matter.Bodies.rectangle(50,100, 50, 50);
 
         Matter.World.add(PhysicsEngine.world, [cons, ground, player]);
-
         Matter.Render.run(Render);
     });
 </script>
@@ -91,14 +124,14 @@
         <CodeEditor />
     </EditorWindow>
     <div class="col-left">
-        f
+        <ComponentProperties />
     </div>
     <div class="col-middle">
         <ProjectDirectory />
         <ComponentsEditor />
     </div>
     <div class="col-right">
-        <button class={isPhysicsEngineRunning && "active"} id="play-btn" on:click={runPhysicsEngine}>
+        <button class={$isPhysicsEngineRunning && "active"} id="play-btn" on:click={runPhysicsEngine}>
             play
         </button>
         <div class="game-canvas-container" bind:this={gameCanvas}></div>
@@ -155,6 +188,9 @@
         .col-left {
             float: left;
             width: calc(70% - #{$canvas-width});
+            height: 100vh;
+            overflow-y: scroll;
+            position: relative;
         }
     }
 </style>
