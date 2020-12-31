@@ -12,8 +12,30 @@ export class NotificationAPI {
 
 export class GameObject {
     
-    constructor(type, x, y, width, height, options) {
-        this.body = Matter.Bodies[type](x, y, width, height, options);
+    constructor(mode, type, x, y, width, height, options) {
+        this.mode = mode;
+        this.type = type;
+        this.offset = {x, y};
+        this.bounds = {width, height};
+        this.scale = {xScale: 1, yScale: 1};
+        this.options = options;
+        this.body = undefined;
+    }
+
+    create() {
+        if (this.mode == "body") {
+            let {x, y} = this.offset;
+            let {width, height} = this.bounds;
+            let {xScale, yScale} = this.scale;
+            this.body = Matter.Bodies[this.type]
+                (x, y, width * xScale, height * yScale , this.options);
+        }
+    }
+
+    remove() {
+        this.body
+            ? Matter.Composite.remove(PhysicsEngine.world, this.body)
+            : undefined; // do nothing
     }
     
     add() {
