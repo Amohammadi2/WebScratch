@@ -4,21 +4,23 @@
     import { GameObject } from "../utils";
 
     let type, x, y, width, height;
-    let isStatic, label;
+    let isStatic, isSensor, isSleeping, label;
 
     let closeComponentCreator = (event) =>
         isComponentCreatorOpened.set(false);
 
     function createComponent(event) {
         console.log(label, type, x , y, width, height);
-        let newGameComponent = new GameObject(type, x, y, width, height, {
+        let newGameComponent = new GameObject("body" ,type, x, y, width, height, {
             label,
-            isStatic
+            isStatic,
+            isSensor,
+            isSleeping,
         });
+        newGameComponent.create();
         newGameComponent.add(); // add it to the world
-        gameComponents.update(value => {
-            // `.body` is the actual game object
-            return [...value, newGameComponent.body];
+        gameComponents.update(value => { 
+            return [...value, newGameComponent];
         });
         closeComponentCreator();
     }
@@ -44,10 +46,20 @@
                 <input type="number" min="0" class="form-input-small" placeholder="width:" bind:value={width}>
                 <input type="number" min="0" class="form-input-small" placeholder="height:" bind:value={height}>
                 <br>
-                <label class="form-input">
-                    is static:
-                    <input type="checkbox" bind:checked={isStatic}>
-                </label>
+                <div class="checkboxes">
+                    <label class="form-input-small">
+                        is static:
+                        <input type="checkbox" bind:checked={isStatic}>
+                    </label>
+                    <label class="form-input-small">
+                        is sensor:
+                        <input type="checkbox" bind:checked={isSensor}>
+                    </label>
+                    <label class="form-input-small">
+                        is sleeping:
+                        <input type="checkbox" bind:checked={isSleeping}>
+                    </label>
+                </div>
             </div>
             <div class="footer">
                 <button class="btn-alert btn-footer" on:click={closeComponentCreator}>close</button>
@@ -133,6 +145,12 @@
                 @extend .form-input;
                 width: 130px;
                 margin: 9px 1.5%;
+            }
+
+            .checkboxes {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
             }
 
         }
