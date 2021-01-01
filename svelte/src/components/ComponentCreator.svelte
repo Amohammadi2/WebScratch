@@ -1,26 +1,35 @@
 <script>
     import { fade, fly } from "svelte/transition";
-    import { isComponentCreatorOpened, gameComponents } from "../states";
+    import { isComponentCreatorOpened, gameComponents, componentsInitialStates } from "../states";
     import { GameObject } from "../utils";
 
     let type, x, y, width, height;
     let isStatic, isSensor, isSleeping, label;
+    let fillStyle = "rgb(45,45,45)";
 
     let closeComponentCreator = (event) =>
         isComponentCreatorOpened.set(false);
 
     function createComponent(event) {
         console.log(label, type, x , y, width, height);
-        let newGameComponent = new GameObject("body" ,type, x, y, width, height, {
+        let mode = "body";
+        let options = {
             label,
             isStatic,
             isSensor,
             isSleeping,
-        });
+            render: {
+                fillStyle
+            }
+        };
+        let newGameComponent = new GameObject(mode ,type, x, y, width, height, options);
         newGameComponent.create();
         newGameComponent.add(); // add it to the world
-        gameComponents.update(value => { 
+        gameComponents.update(value => {
             return [...value, newGameComponent];
+        });
+        componentsInitialStates.update(value => {
+            return [...value, {mode, type, width, height, x, y, options}]
         });
         closeComponentCreator();
     }
@@ -45,7 +54,11 @@
                 <input type="number" min="0" class="form-input-small" placeholder="offset Y:" bind:value={y}>
                 <input type="number" min="0" class="form-input-small" placeholder="width:" bind:value={width}>
                 <input type="number" min="0" class="form-input-small" placeholder="height:" bind:value={height}>
-                <br>
+                <div class="field-group">
+                    <span class="label">background color:</span>
+                    <label for="fillStyle" class="color-preview" style="background-color: {fillStyle}"></label>
+                    <input type="color" class="hidden" bind:value={fillStyle} id="fillStyle">
+                </div>
                 <div class="checkboxes">
                     <label class="form-input-small">
                         is static:
@@ -153,6 +166,30 @@
                 align-items: center;
             }
 
+            .color-preview {
+                width: 25px;
+                height: 25px;
+                display: inline-block;
+            }
+
+            .field-group {
+                display: flex;
+                align-items: center;
+                justify-content: left;
+                padding: 8px 1.5%;
+
+                .label {
+                    line-height: 25px;
+                    height: 25px;
+                    display: inline-block;
+                    margin-right: 20px;
+                }
+            }
+
         }
+    }
+
+    .hidden { // general utility
+        display: none;
     }
 </style>
