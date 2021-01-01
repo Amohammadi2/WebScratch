@@ -1,8 +1,16 @@
 <script>
     import { onMount } from "svelte";
     import { flip } from "svelte/animate";
-    import { notifications, gameComponents, componentsInitialStates, isPhysicsEngineRunning} from "./states";
-    import { GameObject } from "./utils";
+    import {
+        notifications,
+        gameComponents,
+        componentsInitialStates,
+        isPhysicsEngineRunning,
+        projectFileName,
+        CWDPath,
+        pathDelimiter,
+    } from "./states";
+    import { GameObject, NotificationAPI, SystemFile } from "./utils";
     import ProjectDirectory from "./components/ProjectDirectory.svelte";
     import CodeEditor from "./components/CodeEditor.svelte";
     import EditorWindow from "./components/EditorWindow.svelte";
@@ -27,6 +35,12 @@
         else {
             Matter.Runner.stop(EngineRunner);
         }
+    }
+
+    function loadComponents() {
+        if (!$CWDPath) return;
+        let file = new SystemFile($CWDPath + pathDelimiter + projectFileName);
+        componentsInitialStates.set(file.readJSON());
     }
 
     function initComponents() {
@@ -74,9 +88,21 @@
         }
     }
 
+    function saveComponentsIntoFile() {
+        if (!$CWDPath) {
+            NotificationAPI.add("please open project directory first", "alert");
+            return;
+        }
+        let file = new SystemFile($CWDPath + pathDelimiter + projectFileName);
+        file.writeJSON($componentsInitialStates);
+        NotificationAPI.add("the scene saved successfuly", "success");
+    }
+
+
     onMount(() => {
         initPhysicsEngine();
         handleWindowResize();
+        loadComponents();
         initComponents();
         let _=true;
         isPhysicsEngineRunning.subscribe(isRunning => {
@@ -131,9 +157,14 @@
         <ComponentsEditor />
     </div>
     <div class="col-right">
-        <button class={$isPhysicsEngineRunning && "active"} id="play-btn" on:click={runPhysicsEngine}>
-            play
-        </button>
+        <div class="canvas-bar">
+            <button class="btn-bar primary {$isPhysicsEngineRunning && "active"}" on:click={runPhysicsEngine}>
+                play
+            </button>
+            <button class="btn-bar secondary" on:click={saveComponentsIntoFile}>
+                save
+            </button>
+        </div>
         <div class="game-canvas-container" bind:this={gameCanvas}></div>
         <!-- shows the project files -->
     </div>
@@ -169,13 +200,38 @@
                 margin: 0; padding: 0;
             }
 
-            #play-btn {
+            .canvas-bar {
                 position: absolute;
                 top: 20px;
                 right: 20px;
+                .btn-bar {
+                    cursor: pointer;
+                    font-size: 12px;
+                    padding: 4px 5px;
+                    color: rgb(54, 54, 54);
+                    transition: all .09s ease-out;
 
-                &.active {
-                    background-color: rgb(0, 233, 97);
+                    &.primary {
+                        background-color: rgb(166, 227, 255);
+
+                        &.active {
+                            background-color: rgb(15, 114, 160);
+                            color: white;
+                        }
+                    }
+
+                    &.secondary {
+                        background-color: rgb(247, 247, 247);
+
+                        &:hover {
+                            background-color: rgb(207, 207, 207);
+                        }
+
+                        &.active {
+                            background-color: rgb(32, 32, 32);
+                            color: white;
+                        }
+                    }
                 }
             }
         }
