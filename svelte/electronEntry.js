@@ -1,4 +1,4 @@
-let { BrowserWindow, app, dialog, ipcMain} = require("electron");
+let { BrowserWindow, app, dialog, ipcMain } = require("electron");
 let mainWindow;
 
 function initWrapper() {
@@ -24,10 +24,10 @@ function initIPCMainEvents() {
             properties: ["openDirectory"]
         });
         path.then((result) => {
-           if (result.canceled) return;
-           event.reply("directory-selected", result.filePaths[0]);
+            if (result.canceled) return;
+            event.reply("directory-selected", result.filePaths[0]);
         })
-    })
+    });
 }
 
 app.whenReady().then(initWrapper);
