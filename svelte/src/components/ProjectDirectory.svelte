@@ -3,8 +3,29 @@
     import { 
         CWDPath, pathDelimiter, supportedFileFormats, codeEditorContents, isEditorOpened
     } from "./../states";
-    let { ipcRenderer }= require("electron");
-    let fs = require("fs");
+
+    const { ipcRenderer }= require("electron");
+    const fs = require("fs");
+    const { remote } = require("electron");
+    const Menu = remote.Menu;
+
+    let menu = Menu.buildFromTemplate([
+        {
+            label: "new",
+            submenu: [
+                {
+                    label: "script"
+                },
+                {
+                    label: "folder"
+                }
+            ],
+        },
+        {
+            label: "refresh",
+            click: ()=>listCWD($CWDPath),
+        }
+    ]);
 
     let CWDFileList = [];
     let CWDFolderList = [];
@@ -76,12 +97,19 @@
         let full_file_path = file_path + pathDelimiter + file_name;
         let file_ext = file_name.split(".").reverse()[0];
         if (supportedFileFormats.includes(file_ext)) {
-            codeEditorContents.set(fs.readFileSync(full_file_path, "utf8"));
+            codeEditorContents.set
+                ([fs.readFileSync(full_file_path, "utf8"), full_file_path, file_name]);
             isEditorOpened.set(true);
         }
     }
 
+    function handleRightClick(event) {
+        // console.log(Menu, MenuItem, remote);
+        menu.popup();
+    }
+
     CWDPath.subscribe((CWD) => {
+        console.log("CWD: ", CWD);
         CWD && listCWD(CWD);
         CWDRoot = CWD.split(pathDelimiter).reverse()[0];
     });
@@ -89,7 +117,7 @@
     onMount(initComponent);
 </script>
 
-<div class="project-dirs-container" on:contextmenu={(event) => alert("you've right clicked")}>
+<div class="project-dirs-container" on:contextmenu={handleRightClick}>
     {#if !($CWDPath)}
         <div class="justify-content-center">
             <button class="btn-primary btn-big" on:click={selectDirectory}>open folder</button>
