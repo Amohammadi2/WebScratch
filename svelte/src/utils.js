@@ -10,6 +10,32 @@ export class NotificationAPI {
     }
 }
 
+export class SystemFile {
+
+    constructor(path) {
+        this.path = path;
+    }
+
+    write(content) {
+        const { writeFileSync } = require("fs");
+        writeFileSync(this.path, content);
+    }
+
+    writeJSON(content) {
+        let encodedContent = JSON.stringify(content, null, 4);
+        this.write(encodedContent);
+    }
+
+    read () {
+        const { readFileSync } = require("fs");
+        return readFileSync(this.path);
+    }
+
+    readJSON() {
+        return JSON.parse(this.read());
+    }
+}
+
 export class GameObject {
     
     constructor(mode, type, x, y, width, height, options) {
