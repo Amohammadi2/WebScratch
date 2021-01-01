@@ -36,7 +36,7 @@
 
 {#if $activeComponent}
     {#if $isPhysicsEngineRunning}
-        <div class="banner fixed dark">
+        <div class="banner fixed" id="cover">
             stop the engine to access
         </div>
     {/if}
@@ -112,10 +112,10 @@
             top: 0;
             left: 0;
             width: calc(70% - #{$canvas-width});
+        }
 
-            &.dark {
-                background-color: rgba(22, 22, 22, 0.76);
-            }
+        &#cover {
+            background-color: rgba(230, 230, 230, 0.795);
         }
     }
 </style>
