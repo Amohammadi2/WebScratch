@@ -4,7 +4,6 @@
     import {
         notifications,
         gameComponents,
-        componentsInitialStates,
         isPhysicsEngineRunning,
         projectFileName,
         CWDPath,
@@ -37,14 +36,10 @@
         }
     }
 
-    function loadComponents() {
+    function initComponents() {
         if (!$CWDPath) return;
         let file = new SystemFile($CWDPath + pathDelimiter + projectFileName);
-        componentsInitialStates.set(file.readJSON());
-    }
-
-    function initComponents() {
-        for (let stats of $componentsInitialStates) {
+        for (let stats of file.readJSON()) {
             if (stats.mode == "body") {
                 let component = new GameObject
                     (stats.mode, stats.type, stats.x, stats.y, stats.width, stats.height, stats.options);
@@ -82,34 +77,41 @@
         }();
     }
 
-    function clearAllComponents() {
-        for (let gc of $gameComponents){
-            gc.remove();
-        }
-    }
-
     function saveComponentsIntoFile() {
         if (!$CWDPath) {
             NotificationAPI.add("please open project directory first", "alert");
             return;
         }
         let file = new SystemFile($CWDPath + pathDelimiter + projectFileName);
-        file.writeJSON($componentsInitialStates);
+        let stats = [];
+        for (let gc of $gameComponents) {
+            stats.push({
+                mode: gc.mode,
+                type: gc.type,
+                x: gc.offset.x,
+                y: gc.offset.y,
+                width: gc.bounds.width,
+                height: gc.bounds.height,
+                xScale: gc.scale.xScale,
+                yScale: gc.scale.yScale,
+                options: gc.options,
+            });
+        }
+        file.writeJSON(stats);
         NotificationAPI.add("the scene saved successfuly", "success");
     }
-
 
     onMount(() => {
         initPhysicsEngine();
         handleWindowResize();
-        loadComponents();
+        //loadComponents();
         initComponents();
         let _=true;
         isPhysicsEngineRunning.subscribe(isRunning => {
             if (!isRunning && !_) {
-                clearAllComponents();
-                gameComponents.set([]);
-                initComponents();
+                for (let gc of $gameComponents) {
+                    gc.reconstruct();
+                }
             }
             else {
                 _=false;
@@ -125,12 +127,7 @@
             }
         });
 
-        let ground = Matter.Bodies.rectangle(325,600, 650,50, {
-            isStatic: true
-        });
-        let player = Matter.Bodies.rectangle(50,100, 50, 50);
-
-        Matter.World.add(PhysicsEngine.world, [cons, ground, player]);
+        Matter.World.add(PhysicsEngine.world, [cons]);
         Matter.Render.run(Render);
     });
 </script>
