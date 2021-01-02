@@ -9,7 +9,7 @@
     let x = writable(0), y = writable(0);
     let scale_x = writable(0), scale_y = writable(0);
     let isStatic = writable(false), isSensor = writable(false), isSleeping = writable(false);
-    let fillStyle = writable("rgb(25, 25, 25)");
+    let fillStyle = writable("rgb(25, 25, 25)"), label = writable("");
 
     activeComponent.subscribe(component => {
         if (component) {
@@ -22,6 +22,7 @@
             isStatic.set(component.options.isStatic);
             isSensor.set(component.options.isSensor);
             isSleeping.set(component.options.isSleeping);
+            label.set(component.options.label);
         }
     });
 
@@ -89,6 +90,14 @@
         $activeComponent.options.render.fillStyle = v;
         reloadComponent();
     });
+
+    label.subscribe(v => {
+        if (!$activeComponent) return;
+        $activeComponent.options.label = v; // actual label
+        $activeComponent.label.set(v); // assign it to the store as well
+        reloadComponent();
+        console.log($activeComponent);
+    });
 </script>
 
 {#if $activeComponent}
@@ -97,7 +106,14 @@
             stop the engine to access
         </div>
     {/if}
-    <Property title={"transform"}>
+    <Property title={"Entity"}>
+        <FieldSet groupName={"informations"}>
+            <Field label="label">
+                <input type="text" bind:value={$label}>
+            </Field>
+        </FieldSet>
+    </Property>
+    <Property title={"Transform"}>
         <FieldSet groupName={"bounds"}>
             <Field label={"width"}>
                 <input type="number" bind:value={$width}>
@@ -124,7 +140,7 @@
         </FieldSet>
     </Property>
 
-    <Property title={"stats"}>
+    <Property title={"Stats"}>
         <FieldSet groupName={"interactions"}>
             <Field label={"is static"}>    
                 <input type="checkbox" bind:checked={$isStatic}>
@@ -137,7 +153,7 @@
             </Field>
         </FieldSet>
     </Property>
-    <Property title={"material"}>
+    <Property title={"Material"}>
         <FieldSet groupName={"colors"}>
             <Field label={"background color"}>
                 <input type="color" bind:value={$fillStyle}>
