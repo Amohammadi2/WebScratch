@@ -1,7 +1,8 @@
 <script>
     import { onMount } from "svelte";
+    import { SystemFile } from "../utils";
     import { 
-        CWDPath, pathDelimiter, supportedFileFormats, codeEditorContents, isEditorOpened
+        CWDPath, pathDelimiter, supportedFileFormats, codeEditorContents, isEditorOpened, projectFileName
     } from "./../states";
 
     const { ipcRenderer }= require("electron");
@@ -27,6 +28,14 @@
         }
     ]);
 
+    function createFolder() {
+        // TODO: implement this function
+    }
+
+    function createScript() {
+        // TODO: implement this function
+    }
+
     let CWDFileList = [];
     let CWDFolderList = [];
     let CWDRoot = ""; 
@@ -44,9 +53,9 @@
 
     function initIPCRenderer() {
         ipcRenderer.on("directory-selected", (event, path) => {
-           CWDPath.set(path);
-           // *tip: CWD -> [C]urrent [W]orking [D]irectory
-           localStorage.setItem("CWDPath", path);
+            CWDPath.set(path);
+            // *tip: CWD -> [C]urrent [W]orking [D]irectory
+            localStorage.setItem("CWDPath", path);
         });
     }
 
@@ -67,6 +76,12 @@
         });
         CWDFileList = files;
         CWDFolderList = folders;
+        if (path == $CWDPath && !(CWDFileList.includes(projectFileName))) {
+            // initialize project directory
+            new SystemFile ($CWDPath + pathDelimiter + projectFileName).writeJSON([]);
+            // reload all the files
+            listCWD(path);
+        }
     }
 
     function changeDirectory(rel_path){
