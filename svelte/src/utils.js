@@ -1,3 +1,4 @@
+import { writable } from "svelte/store";
 import { notifications, pathDelimiter } from "./states";
 
 export class NotificationAPI {
@@ -36,8 +37,11 @@ export class SystemFile {
         return JSON.parse(this.read());
     }
 
-    rename() {
+    rename(new_name) {
         // TODO: implement this function
+        const { rename } = this.fs;
+
+        //rename(this.path);
     }
 
     remove() {
@@ -77,6 +81,7 @@ export class GameObject {
         this.bounds = {width, height};
         this.scale = {xScale: 1, yScale: 1};
         this.options = options;
+        this.label = writable(options.label || "");
         this.body = undefined;
     }
 
