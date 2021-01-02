@@ -15,6 +15,9 @@
             click: ()=>setActiveComponent(),
         }
     ]);
+    let label = "";
+
+    component.label.subscribe(v => label = v);
 
     function removeComponent() {
         if ($activeComponent == component) {
@@ -46,7 +49,7 @@
         <img src="./icons/component.svg" alt={"component"} />
     </span>
     <span class="comp-name">
-        {component.body.label}
+        {label}
     </span>
 </div>
 
