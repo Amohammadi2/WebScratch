@@ -1,37 +1,94 @@
 <script>
+    import { writable } from "svelte/store";
     import { activeComponent, isPhysicsEngineRunning } from "../states";
     import Property from "./Property.svelte";
     import FieldSet from "./FieldSet.svelte";
     import Field from "./Field.svelte";
 
-    let width, height, x, y, scale_x, scale_y;
-    let isStatic, isSensor, isSleeping;
+    let width = writable(0), height = writable(0);
+    let x = writable(0), y = writable(0);
+    let scale_x = writable(0), scale_y = writable(0);
+    let isStatic = writable(false), isSensor = writable(false), isSleeping = writable(false);
+    let fillStyle = writable("rgb(25, 25, 25)");
 
     activeComponent.subscribe(component => {
-        console.log(component);
         if (component) {
-            const { min, max} =  component.body.bounds;
-            const position = component.body.position;
-            const render = component.body.render;
-            scale_x = render.sprite.xScale;
-            scale_y = render.sprite.yScale;
-            width = (max.x - min.x) / scale_x;
-            height = max.y - min.y / scale_y;
-            x = position.x;
-            y = position.y;
-            isStatic = component.body.isStatic || false;
-            isSensor = component.body.isSensor || false;
-            isSleeping = component.body.isSensor || false;
+            width.set(component.bounds.width);
+            height.set(component.bounds.height);
+            x.set(component.offset.x);
+            y.set(component.offset.y);
+            scale_x.set(component.scale.xScale);
+            scale_y.set(component.scale.yScale);
+            isStatic.set(component.options.isStatic);
+            isSensor.set(component.options.isSensor);
+            isSleeping.set(component.options.isSleeping);
         }
     });
-    $: if ($activeComponent) {
-        Matter.Events.on(PhysicsEngine, "beforeUpdate", function callbackFN(event) {
-            Matter.Body.scale($activeComponent.body, scale_x, scale_y);
-            window.secret= $activeComponent;
-            // remove the handler so that it gets called just once
-            Matter.Events.off(PhysicsEngine, "beforeUpdate", callbackFN);
-        });
+
+    function reloadComponent() {
+        if ($activeComponent)
+            $activeComponent.reconstruct();
     }
+
+    width.subscribe(v => {
+        if (!$activeComponent) return;
+        $activeComponent.bounds.width = v;
+        reloadComponent();
+    });
+
+    height.subscribe(v => {
+        if (!$activeComponent) return;
+        $activeComponent.bounds.height = v;
+        reloadComponent();
+    });
+
+    x.subscribe(v => {
+        if (!$activeComponent) return;
+        $activeComponent.offset.x = v;
+        reloadComponent();
+    });
+
+    y.subscribe(v => {
+        if (!$activeComponent) return;
+        $activeComponent.offset.y = v;
+        reloadComponent();
+    });
+
+    scale_x.subscribe(v => {
+        if (!$activeComponent) return;
+        $activeComponent.scale.xScale = v;
+        reloadComponent();
+    });
+
+    scale_y.subscribe(v => {
+        if (!$activeComponent) return;
+        $activeComponent.scale.yScale = v;
+        reloadComponent();
+    });
+
+    isStatic.subscribe(v => {
+        if (!$activeComponent) return;
+        $activeComponent.options.isStatic = v;
+        reloadComponent();
+    });
+
+    isSensor.subscribe(v => {
+        if (!$activeComponent) return;
+        $activeComponent.options.isSensor = v;
+        reloadComponent();
+    });
+
+    isSleeping.subscribe(v => {
+        if (!$activeComponent) return;
+        $activeComponent.options.isSleeping = v;
+        reloadComponent();
+    });
+
+    fillStyle.subscribe(v => {
+        if (!$activeComponent) return;
+        $activeComponent.options.render.fillStyle = v;
+        reloadComponent();
+    });
 </script>
 
 {#if $activeComponent}
@@ -41,26 +98,28 @@
         </div>
     {/if}
     <Property title={"transform"}>
-        <FieldSet groupName={"position"}>
+        <FieldSet groupName={"bounds"}>
             <Field label={"width"}>
-                <input type="number" bind:value={width}>
+                <input type="number" bind:value={$width}>
             </Field>
             <Field label={"height"}>
-                <input type="number" bind:value={height}>
+                <input type="number" bind:value={$height}>
             </Field>
+        </FieldSet>
+        <FieldSet groupName={"position"}>
             <Field label={"offset X"}>
-                <input type="number" bind:value={x}>
+                <input type="number" bind:value={$x}>
             </Field>
             <Field label={"offset Y"}>
-                <input type="number" bind:value={y}>
+                <input type="number" bind:value={$y}>
             </Field>
         </FieldSet>
         <FieldSet groupName={"scale"}>
             <Field label={"scale X"}>
-                <input type="number" bind:value={scale_x}>
+                <input type="number" bind:value={$scale_x}>
             </Field>
             <Field label={"scale Y"}>
-                <input type="number"  bind:value={scale_y}>
+                <input type="number"  bind:value={$scale_y}>
             </Field>
         </FieldSet>
     </Property>
@@ -68,13 +127,20 @@
     <Property title={"stats"}>
         <FieldSet groupName={"interactions"}>
             <Field label={"is static"}>    
-                <input type="checkbox" bind:checked={$activeComponent.body.isStatic}>
+                <input type="checkbox" bind:checked={$isStatic}>
             </Field>
             <Field label={"is sensor"}>    
-                <input type="checkbox" bind:checked={$activeComponent.body.isSensor}>
+                <input type="checkbox" bind:checked={$isSensor}>
             </Field>
             <Field label={"is sleeping"}>    
-                <input type="checkbox" bind:checked={$activeComponent.body.isSleeping}>
+                <input type="checkbox" bind:checked={$isSleeping}>
+            </Field>
+        </FieldSet>
+    </Property>
+    <Property title={"material"}>
+        <FieldSet groupName={"colors"}>
+            <Field label={"background color"}>
+                <input type="color" bind:value={$fillStyle}>
             </Field>
         </FieldSet>
     </Property>
