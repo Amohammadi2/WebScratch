@@ -1,13 +1,47 @@
 <script>
-    import { activeComponent } from "../states";
+    import { activeComponent, gameComponents } from "../states";
     export let component;
 
-    function setActiveComponent(event) {
+    const { remote } = require("electron");
+    const { Menu } = remote;
+
+    let menu = Menu.buildFromTemplate([
+        {
+            label: "remove component",
+            click: ()=>removeComponent(),
+        },
+        {
+            label: "edit properties",
+            click: ()=>setActiveComponent(),
+        }
+    ]);
+
+    function removeComponent() {
+        if ($activeComponent == component) {
+            activeComponent.set(null);
+        }
+        component.remove();
+        gameComponents.update(val => {
+            return val.filter(gc => {
+                return (gc != component);
+            });
+        });
+    }
+
+    function setActiveComponent() {
         activeComponent.set(component);
+    }
+
+    function handleRightClick() {
+        menu.popup();
     }
 </script>
 
-<div class="game-component {($activeComponent == component) && 'active'}" on:click={setActiveComponent}>
+<div 
+    class="game-component {($activeComponent == component) && 'active'}"
+    on:click={setActiveComponent}
+    on:contextmenu={handleRightClick}
+>
     <span class="material-icon">
         <img src="./icons/component.svg" alt={"component"} />
     </span>
