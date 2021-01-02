@@ -1,6 +1,6 @@
 <script>
     import { fade, fly } from "svelte/transition";
-    import { isComponentCreatorOpened, gameComponents, componentsInitialStates } from "../states";
+    import { isComponentCreatorOpened, gameComponents } from "../states";
     import { GameObject } from "../utils";
 
     let type, x, y, width, height;
@@ -27,9 +27,6 @@
         newGameComponent.add(); // add it to the world
         gameComponents.update(value => {
             return [...value, newGameComponent];
-        });
-        componentsInitialStates.update(value => {
-            return [...value, {mode, type, width, height, x, y, options}]
         });
         closeComponentCreator();
     }
