@@ -15,4 +15,3 @@ export const notifications = writable([]);
 export const activeComponent = writable(null);
 export const isPhysicsEngineRunning = writable(false);
 export const projectFileName = "project.components.json";
-export const componentsInitialStates = writable([]);
