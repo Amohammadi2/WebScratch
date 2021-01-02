@@ -1,4 +1,4 @@
-import { notifications } from "./states";
+import { notifications, pathDelimiter } from "./states";
 
 export class NotificationAPI {
     static add(msg, type) {
@@ -14,10 +14,11 @@ export class SystemFile {
 
     constructor(path) {
         this.path = path;
+        this.fs = require("fs");
     }
 
     write(content) {
-        const { writeFileSync } = require("fs");
+        const { writeFileSync } = this.fs;
         writeFileSync(this.path, content);
     }
 
@@ -27,18 +28,49 @@ export class SystemFile {
     }
 
     read () {
-        const { readFileSync } = require("fs");
+        const { readFileSync } = this.fs;
         return readFileSync(this.path);
     }
 
     readJSON() {
         return JSON.parse(this.read());
     }
+
+    rename() {
+        // TODO: implement this function
+    }
+
+    remove() {
+        // TODO: implement this function
+    }
+}
+
+export class SystemFolder {
+
+    constructor(path, name) {
+        this.path = path;
+        this.name = name;
+        this.fs = require("fs");
+    }
+
+    create() {
+        const { mkdirSync, existsSync } = this.fs;
+        let folder_path = this.path + pathDelimiter + this.name;
+        (existsSync(folder_path)) || mkdirSync(folder_path);
+    }
+
+    rename() {
+        // TODO: implement this function
+    }
+
+    remove() {
+        // TODO: implement this function
+    }
 }
 
 export class GameObject {
     
-    constructor(mode, type, x, y, width, height, options) {
+    constructor( mode, type, x, y, width, height, options) {
         this.mode = mode;
         this.type = type;
         this.offset = {x, y};
@@ -66,6 +98,12 @@ export class GameObject {
     
     add() {
         Matter.World.add(PhysicsEngine.world, this.body);
+    }
+
+    reconstruct() {
+        this.remove();
+        this.create();
+        this.add();
     }
 
     // should be overwritten
