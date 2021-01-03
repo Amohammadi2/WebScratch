@@ -1,6 +1,8 @@
 import { writable } from "svelte/store";
 import { notifications, pathDelimiter } from "./states";
 
+const { dialog } = require("electron").remote;
+
 export class NotificationAPI {
     static add(msg, type) {
         notifications.update((value) => {
@@ -38,29 +40,33 @@ export class SystemFile {
     }
 
     rename(new_name) {
-        // TODO: implement this function
-        const { rename } = this.fs;
-
-        //rename(this.path);
+        const { renameSync, existsSync } = this.fs;
+        let path = this.path.split(pathDelimiter);
+        path.splice(path.length-1, 1);
+        path.push(new_name);
+        let new_path = path.join(pathDelimiter);
+        console.log (new_path);
+        (existsSync(this.path)) && renameSync(this.path, new_path);
     }
 
     remove() {
         // TODO: implement this function
+        const { rmdirSync } = this.fs;
+        console.log(this.path);
+        rmdirSync(this.path, {recursive: true});
     }
 }
 
 export class SystemFolder {
 
-    constructor(path, name) {
+    constructor(path) {
         this.path = path;
-        this.name = name;
         this.fs = require("fs");
     }
 
     create() {
         const { mkdirSync, existsSync } = this.fs;
-        let folder_path = this.path + pathDelimiter + this.name;
-        (existsSync(folder_path)) || mkdirSync(folder_path);
+        (existsSync(this.path)) || mkdirSync(this.path);
     }
 
     rename() {
@@ -69,11 +75,15 @@ export class SystemFolder {
 
     remove() {
         // TODO: implement this function
+        const { rmdirSync } = this.fs;
+        console.log(this.path);
+        rmdirSync(this.path, {recursive: true});
     }
 }
 
 export class GameObject {
-    
+    // ! @snippet
+    //Object.getOwnPropertyNames(a).concat(Object.getOwnPropertyNames(a.__proto__))
     constructor( mode, type, x, y, width, height, options) {
         this.mode = mode;
         this.type = type;
@@ -82,6 +92,7 @@ export class GameObject {
         this.scale = {xScale: 1, yScale: 1};
         this.options = options;
         this.label = writable(options.label || "");
+        this.scripts = writable([]);
         this.body = undefined;
     }
 
@@ -123,4 +134,22 @@ export class GameObject {
         this.setup();
         requestAnimationFrame(this.update.bind(this));
     }
+}
+
+export class Dialogs {
+
+    static alert (message) {
+        return dialog.showMessageBoxSync(undefined, {
+            message,
+        });
+    }
+
+    static confirm(question) {
+        return [true, false][dialog.showMessageBoxSync(undefined, {
+            message: question,
+            type: "question",
+            buttons: ["Yes", "No"],
+        })];
+    }
+
 }

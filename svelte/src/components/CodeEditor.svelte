@@ -1,8 +1,8 @@
 <script>
     import { onMount } from "svelte";
     import { codeEditorContents, isEditorOpened } from "../states";
-    import { NotificationAPI, SystemFile } from "../utils";
-    
+    import { NotificationAPI, SystemFile, Dialogs } from "../utils";
+
     let textArea;
     let editor;
 
@@ -20,10 +20,10 @@
     function closeEditor(event) {
         let currentValue = editor.getDoc().getValue();
         let previousValue = content;
-        console.log("current", currentValue);
+        console.log("current:", currentValue);
         console.log("pre: ", previousValue);
         let message = "you haven't saved the file. do you want to close it anyway";
-        if (currentValue == previousValue || confirm(message))
+        if (currentValue == previousValue || Dialogs.confirm(message))
             isEditorOpened.set(false);
     }
 
@@ -120,7 +120,7 @@
                         background-color: rgb(172, 30, 30);
                         color:rgb(255, 255, 255);
                     }
-                }   
+                }
             }
         }
     }

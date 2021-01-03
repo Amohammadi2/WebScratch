@@ -1,5 +1,6 @@
 <script>
     import { onMount } from "svelte";
+    import { get } from "svelte/store";
     import { flip } from "svelte/animate";
     import {
         notifications,
@@ -9,7 +10,7 @@
         CWDPath,
         pathDelimiter,
     } from "./states";
-    import { GameObject, NotificationAPI, SystemFile } from "./utils";
+    import { GameObject, NotificationAPI, SystemFile} from "./utils";
     import ProjectDirectory from "./components/ProjectDirectory.svelte";
     import CodeEditor from "./components/CodeEditor.svelte";
     import EditorWindow from "./components/EditorWindow.svelte";
@@ -43,6 +44,7 @@
             if (stats.mode == "body") {
                 let component = new GameObject
                     (stats.mode, stats.type, stats.x, stats.y, stats.width, stats.height, stats.options);
+                component.scripts.set(stats.scripts);
                 gameComponents.update(components => [...components, component]);
                 component.create();
                 component.add(); // add to the world
@@ -65,6 +67,7 @@
             }
         });
         window.EngineRunner = Matter.Runner.create();
+        window.gm = GameObject;
     }
 
     function handleWindowResize() {
@@ -94,6 +97,7 @@
                 height: gc.bounds.height,
                 xScale: gc.scale.xScale,
                 yScale: gc.scale.yScale,
+                scripts: get(gc.scripts),
                 options: gc.options,
             });
         }

@@ -1,18 +1,22 @@
 <script>
-    import { writable } from "svelte/store";
+    import { get, writable } from "svelte/store";
     import { activeComponent, isPhysicsEngineRunning } from "../states";
     import Property from "./Property.svelte";
     import FieldSet from "./FieldSet.svelte";
     import Field from "./Field.svelte";
+    import GameScript from "./GameScript.svelte";
 
     let width = writable(0), height = writable(0);
     let x = writable(0), y = writable(0);
     let scale_x = writable(0), scale_y = writable(0);
     let isStatic = writable(false), isSensor = writable(false), isSleeping = writable(false);
     let fillStyle = writable("rgb(25, 25, 25)"), label = writable("");
+    let scripts = [];
+    let unsubscribeScripts; // callback function
 
     activeComponent.subscribe(component => {
         if (component) {
+            unsubscribeScripts && unsubscribeScripts();
             width.set(component.bounds.width);
             height.set(component.bounds.height);
             x.set(component.offset.x);
@@ -23,6 +27,9 @@
             isSensor.set(component.options.isSensor);
             isSleeping.set(component.options.isSleeping);
             label.set(component.options.label);
+            unsubscribeScripts = component.scripts.subscribe(s => {
+                scripts = s;
+            });
         }
     });
 
@@ -159,6 +166,13 @@
                 <input type="color" bind:value={$fillStyle}>
             </Field>
         </FieldSet>
+    </Property>
+    <Property title={"Scripts"}>
+        <div class="script-list">
+            {#each scripts as script}
+                <GameScript name={script.name} path={script.path} component={get(activeComponent)}/>
+            {/each}
+        </div>
     </Property>
 {:else}
     <div class="banner">

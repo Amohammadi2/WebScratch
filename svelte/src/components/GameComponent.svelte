@@ -60,19 +60,20 @@
         cursor: pointer;
         width: 100%;
         box-sizing: border-box;
-        padding: 5px 4px;
+        padding: 8px 4px;
         transition: all .09s ease-out;
         display: flex;
         flex-direction: row;
         align-items: center;
+        user-select: none;
 
         &:hover {
-            background-color: rgb(206, 237, 252);
+            background-color: rgb(223, 233, 248);
         }
 
         &.active {
-            background-color: rgb(0, 119, 179);
-            color: white;
+            background-color: rgb(149, 178, 221);
+            color: rgb(58, 58, 58);
         }
 
         .comp-name {

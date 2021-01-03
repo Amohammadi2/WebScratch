@@ -1,9 +1,11 @@
 <script>
     import { onMount } from "svelte";
-    import { SystemFile } from "../utils";
+    import { NotificationAPI, SystemFile, SystemFolder } from "../utils";
     import { 
         CWDPath, pathDelimiter, supportedFileFormats, codeEditorContents, isEditorOpened, projectFileName
     } from "./../states";
+    import Prompt from "./Prompt.svelte";
+    import FileListItem from "./FileListItem.svelte";
 
     const { ipcRenderer }= require("electron");
     const fs = require("fs");
@@ -15,25 +17,33 @@
             label: "new",
             submenu: [
                 {
-                    label: "script"
+                    label: "script",
+                    click: ()=>openPromptWindow("create-script", "enter the script name:")
                 },
                 {
-                    label: "folder"
+                    label: "folder",
+                    click: ()=>openPromptWindow("create-folder", "enter the folder name:"),
                 }
             ],
         },
         {
             label: "refresh",
-            click: ()=>listCWD($CWDPath),
+            click: ()=>listCWD($CWDPath + relativePath),
         }
     ]);
 
-    function createFolder() {
-        // TODO: implement this function
-    }
+    let openPrompt = false;
+    let promptPurpose = "";
+    let promptMsg = "";
 
-    function createScript() {
-        // TODO: implement this function
+    function openPromptWindow(purpose, msg) {
+        if (!$CWDPath) {
+            NotificationAPI.add("please open project directory first", "alert");
+            return;
+        }
+        promptPurpose = purpose;
+        promptMsg = msg;
+        openPrompt = true;
     }
 
     let CWDFileList = [];
@@ -118,9 +128,33 @@
         }
     }
 
+    function createScript(script_path, script_name) {
+        new SystemFile(script_path + pathDelimiter + script_name + ".js").write("");
+    }
+
+    function createFolder(folder_path, folder_name) {
+        new SystemFolder(folder_path + pathDelimiter + folder_name).create();
+    }
+
     function handleRightClick(event) {
-        // console.log(Menu, MenuItem, remote);
+        if (!$CWDPath) return;
         menu.popup();
+    }
+
+    function handlePromptMessage(event) {
+        let { message, purpose } = event.detail;
+        let actions = {
+            "create-script": createScript,
+            "create-folder": createFolder,
+        }
+        openPrompt = false;
+        let path = $CWDPath + relativePath;
+        actions[purpose](path, message);
+        listCWD(path);
+    }
+
+    function handlePromptCancel() {
+        openPrompt = false;
     }
 
     CWDPath.subscribe((CWD) => {
@@ -132,6 +166,13 @@
     onMount(initComponent);
 </script>
 
+<Prompt
+    open={openPrompt}
+    purpose={promptPurpose}
+    msg={promptMsg}
+    on:message={handlePromptMessage}
+    on:cancel={handlePromptCancel}
+/>
 <div class="project-dirs-container" on:contextmenu={handleRightClick}>
     {#if !($CWDPath)}
         <div class="justify-content-center">
@@ -151,20 +192,24 @@
         </div>
         <ul class="file-list">
             {#each CWDFolderList as folder}
-                <li on:click={(event)=>changeDirectory(folder)}>
-                    <span class="material-icon">
-                        <img src="./icons/folder.svg" alt={"folder:"}/>
-                    </span>
-                    <span class="file-name">{folder}</span>
-                </li>
+                <FileListItem 
+                    name={folder}
+                    icon={"folder"}
+                    type={"folder"}
+                    path={$CWDPath + relativePath + pathDelimiter + folder}
+                    on:click={()=>changeDirectory(folder)}
+                    on:refresh={()=>listCWD($CWDPath + relativePath)}
+                />
             {/each}
             {#each CWDFileList as file}
-                <li on:click={(event) => (openFile($CWDPath + relativePath, file))}>
-                    <span class="material-icon">
-                        <img src="./icons/file.svg" alt={"file:"}/>
-                    </span>
-                    <span class="file-name">{file}</span>
-                </li>
+                <FileListItem 
+                    name={file}
+                    icon={"file"}
+                    type={"file"}
+                    path={$CWDPath + relativePath + pathDelimiter + file}
+                    on:click={()=>openFile($CWDPath + relativePath, file)}
+                    on:refresh={()=>listCWD($CWDPath + relativePath)}
+                />
             {/each}
         </ul>
     {/if}
@@ -177,7 +222,7 @@
     .project-dirs-container {
         width: $full;
         height: calc(50vh);
-        background-color: rgb(230, 230, 230);
+        background-color: rgb(255, 255, 255);
         overflow-y: scroll;
         box-sizing: border-box;
         color: rgb(31, 31, 31);
@@ -187,19 +232,7 @@
         .file-list {
             list-style: none;
             margin-top: 50px;
-
-            li {
-                display: flex;
-                align-items: center;
-                justify-content: left;
-                margin-top: 8px;
-                margin-bottom: 8px;
-                cursor: pointer;
-                
-                span {
-                    margin: 0px 8px;
-                }
-            }
+            padding-left: 0;
         }
     }
 
