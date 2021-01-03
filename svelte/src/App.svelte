@@ -10,7 +10,7 @@
         CWDPath,
         pathDelimiter,
     } from "./states";
-    import { GameObject, NotificationAPI, SystemFile} from "./utils";
+    import { Dialogs, GameObject, NotificationAPI, SystemFile} from "./utils";
     import ProjectDirectory from "./components/ProjectDirectory.svelte";
     import CodeEditor from "./components/CodeEditor.svelte";
     import EditorWindow from "./components/EditorWindow.svelte";
@@ -20,6 +20,7 @@
     import ComponentProperties from "./components/ComponentProperties.svelte";
 
     let gameCanvas;
+    let isFirstRun = true;
 
     function closeNotification (pk) {
         notifications.update((value) => {
@@ -27,13 +28,21 @@
         });
     }
 
+    function loadScripts() {
+        for (let gc of $gameComponents) {
+            gc.setupScripts(isFirstRun);
+        }
+    }
+
     function runPhysicsEngine() {
         isPhysicsEngineRunning.set(!($isPhysicsEngineRunning));
         if ($isPhysicsEngineRunning){
             Matter.Runner.run(EngineRunner, PhysicsEngine);
+            loadScripts();
         }
         else {
             Matter.Runner.stop(EngineRunner);
+            isFirstRun = false;
         }
     }
 
@@ -68,6 +77,11 @@
         });
         window.EngineRunner = Matter.Runner.create();
         window.gm = GameObject;
+    }
+
+    function exposeInternalAPIs() {
+        window.GameObject = GameObject;
+        window.Dialogs = Dialogs;
     }
 
     function handleWindowResize() {
@@ -106,6 +120,7 @@
     }
 
     onMount(() => {
+        exposeInternalAPIs();
         initPhysicsEngine();
         handleWindowResize();
         //loadComponents();
@@ -121,17 +136,6 @@
                 _=false;
             }
         });
-        let cons = Matter.MouseConstraint.create(PhysicsEngine, {
-            mouse: Matter.Mouse.create(Render.canvas),
-            constraint: {
-                stiffness: 0.1,
-                render: {
-                    visible: false,
-                }
-            }
-        });
-
-        Matter.World.add(PhysicsEngine.world, [cons]);
         Matter.Render.run(Render);
     });
 </script>

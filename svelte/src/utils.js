@@ -1,4 +1,4 @@
-import { writable } from "svelte/store";
+import { writable, get } from "svelte/store";
 import { notifications, pathDelimiter } from "./states";
 
 const { dialog } = require("electron").remote;
@@ -54,6 +54,12 @@ export class SystemFile {
         const { rmdirSync } = this.fs;
         console.log(this.path);
         rmdirSync(this.path, {recursive: true});
+    }
+
+    get directory() {
+        let path = this.path.split(pathDelimiter);
+        path.splice(path.length-1, 1);
+        return path.join(pathDelimiter);
     }
 }
 
@@ -123,16 +129,20 @@ export class GameObject {
     }
 
     // should be overwritten
-    setup() {};
-
-    // should be overwritten
-    update(){
-        requestAnimationFrame(this.update.bind(this));
-    }
-
-    run() {
-        this.setup();
-        requestAnimationFrame(this.update.bind(this));
+    setupScripts(isFirstRun) {
+        let that = this;
+        for (let script of get(this.scripts)) {
+            let file = new SystemFile(script.path);
+            let dir = file.directory;
+            let new_name = script.name + "." + Math.random()*1000000 + ".js";
+            file.rename(new_name);
+            import(dir + pathDelimiter + new_name)
+            .then(s=> {
+                new SystemFile(dir + pathDelimiter + new_name).rename(script.name);
+                s.setup(that, isFirstRun);
+            })
+            .catch(console.error);
+        }
     }
 }
 
